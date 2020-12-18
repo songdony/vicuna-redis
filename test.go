@@ -1,25 +1,36 @@
 package main
 
 import (
-	"fmt"
-	"time"
+	"github.com/gin-gonic/gin"
 
-	"github.com/songdony/vicuna-redis/go_redis"
+	"github.com/songdony/vicuna-redis/lib"
 )
 
 func main()  {
-	//iter:=go_redis.NewStringOperation().MGet("name","name2").Iter()
-	//
-	//for iter.HasNext(){
-	//	fmt.Println(iter.Next())
-	//}
+	r := gin.New()
+	r.Use(func(context *gin.Context) {
+		defer func() {
+			if e:= recover();e!=nil{
+				context.JSON(400,gin.H{"message":e})
+			}
+		}()
+		context.Next()
+	})
+	r.Handle("GET","/news/:id", func(context *gin.Context) {
+		// 对象池获取
+		newsCache := lib.NewsCache()
+		defer lib.ReleaseNewsCache(newsCache)
+		// key: news123 news101
+		newsID := context.Param("id")
+		newsCache.DBGetter = lib.NewsDBGetter(newsID)
 
-	//fmt.Println(go_redis.NewStringOperation().Get("name").Unwrap_Or("nothing"))
+		//context.Header("Content-type","application/json")
+		//context.String(200,newsCache.GetCache("news"+newsID).(string))
+		newsModel := lib.NewNewsModel()
+		newsCache.GetCacheForObject("news"+newsID,newsModel)
+		context.JSON(200,newsModel)
+	})
 
-	fmt.Println(
-		go_redis.NewStringOperation().
-			Set("name","dony",
-				go_redis.WithExpire(time.Second*25),
-				go_redis.WithXX(),  //
-				))
+	r.Run(":8080")
+
 }
