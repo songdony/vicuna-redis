@@ -13,10 +13,13 @@ func main()  {
 	//for iter.HasNext(){
 	//	fmt.Println(iter.Next())
 	//}
+
+	//fmt.Println(go_redis.NewStringOperation().Get("name").Unwrap_Or("nothing"))
+
 	fmt.Println(
 		go_redis.NewStringOperation().
 			Set("name","dony",
 				go_redis.WithExpire(time.Second*25),
-				go_redis.WithNX(),  //
+				go_redis.WithXX(),  //
 				))
 }

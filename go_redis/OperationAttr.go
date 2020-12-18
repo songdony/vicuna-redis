@@ -10,6 +10,7 @@ type empty struct {}
 const (
 	ATTR_EXPIRE="expr"   //过期时间
 	ATTR_NX ="nx"  // setnx
+	ATTR_XX = "xx"   // setxx
 )
 //属性
 type OperationAttr struct {
@@ -34,4 +35,8 @@ func WithExpire(t time.Duration) *OperationAttr  {
 
 func WithNX() *OperationAttr  {
 	return &OperationAttr{Name:ATTR_NX,Value:empty{}}
+}
+
+func WithXX() *OperationAttr  {
+	return &OperationAttr{Name:ATTR_XX,Value:empty{}}
 }

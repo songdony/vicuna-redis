@@ -1,5 +1,9 @@
 package go_redis
 
+type Result interface {
+	Unwrap()
+}
+
 type StringResult struct {
 	Result string
 	Err error

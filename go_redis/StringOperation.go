@@ -15,15 +15,19 @@ func NewStringOperation() *StringOperation {
 }
 
 func(this *StringOperation) Set(key string,value interface{},attrs ...*OperationAttr) *InterfaceResult   {
-	exp:=OperationAttrs(attrs).Find(ATTR_EXPIRE)
+	exp := OperationAttrs(attrs).Find(ATTR_EXPIRE).Unwrap_Or(time.Second*0).(time.Duration)
 
-	nx:=OperationAttrs(attrs).Find(ATTR_NX).Unwrap_Or(nil)
-	if nx!=nil{
-		return NewInterfaceResult(Redis().SetNX(this.ctx,key,value,exp.Unwrap_Or(time.Second*0).(time.Duration)).Result())
+	nx := OperationAttrs(attrs).Find(ATTR_NX).Unwrap_Or(nil)
+	if nx != nil{
+		return NewInterfaceResult(Redis().SetNX(this.ctx,key,value,exp).Result())
 	}
-	return NewInterfaceResult(Redis().Set(this.ctx,key,value,
-		exp.Unwrap_Or(time.Second*0).(time.Duration)).Result())
+	xx := OperationAttrs(attrs).Find(ATTR_XX).Unwrap_Or(nil)
+	if xx != nil{
+		return NewInterfaceResult(Redis().SetXX(this.ctx,key,value,exp).Result())
+	}
 
+	return NewInterfaceResult(Redis().Set(this.ctx,key,value,
+		exp).Result())
 }
 
 func(this *StringOperation) Get(key string ) *StringResult  {
